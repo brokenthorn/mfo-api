@@ -1,8 +1,10 @@
-///// 404 handler
-// pub(crate) async fn handle404(req: HttpRequest) -> Result<HttpResponse> {
-//     info!("404: {:?}", req);
+use tide::prelude::json;
+use tide::{Request, Response, Result, StatusCode};
 
-//     Ok(HttpResponse::build(StatusCode::NOT_FOUND)
-//         .content_type("application/json; charset=utf-8")
-//         .body("{ \"error\": \"404: NOT FOUND\" }"))
-// }
+/// Custom handler function for invalid resources (404: NOT FOUND)
+pub async fn handle_404(req: Request<crate::api::context::Context>) -> Result<Response> {
+    tide::log::info!("Path not found (404): {:?}", req);
+    Ok(Response::builder(StatusCode::NotFound)
+        .body(json!({ "error": "NOT_FOUND", "code": 404 }))
+        .build())
+}
