@@ -5,7 +5,6 @@ use tide::{Body, Request, Response, Result, StatusCode};
 
 /// Handler function for `GET /stock`
 pub async fn get_stock(req: Request<crate::api::context::Context>) -> Result<Response> {
-    tide::log::info!("Executing handler function for `GET /stock`: {:?}", req);
     let stock_line_item = StockLineItem {
         zona: String::from("A"),
         id_articol: 1,
@@ -21,11 +20,35 @@ pub async fn get_stock(req: Request<crate::api::context::Context>) -> Result<Res
     let state = req.state();
     let conn_result = state.db.connect().await;
     match conn_result {
-        Ok(conn) => {
-            tide::log::info!("Got connection: {:?}", conn);
+        Ok(mut conn) => {
+            tide::log::info!("Got MSSQL connection: {:?}", conn);
+
+            let current_date = chrono::Local::now().format("%Y%m%d %H:%M:%S").to_string();
+            // NOTE: Due to a bug, SET NOCOUNT ON needs to be used when expecting results back from executing stored procedure, otherwise the driver gets back an affected rows value after which it stops processing the stream and does not get further result sets.
+            match conn.query(
+                "SET NOCOUNT ON; DECLARE @mesaj_eroare VARCHAR(255); EXEC [BizPharmaHO].[dbo].[spBPWSWebGetStoc] @DataUltimaActualizare = '19000101', @DataCurenta = @P1, @MesajEroare = @mesaj_eroare OUTPUT; SELECT @mesaj_eroare AS [mesaj_eroare];",
+                &[&current_date],
+            ).await {
+                Ok(qr) => {
+                    let results = qr.into_results().await?;
+                    let trimmed_results = results.into_iter().map(|mut x| { x.truncate(2); x }).collect::<Vec<Vec<tiberius::Row>>>();
+                    tide::log::info!("Got MSSQL query results (truncated results to first 2 rows): {:#?}", trimmed_results);
+                }
+                Err(err) => {
+                    tide::log::error!("Error getting MSSQL query results: {:?}", err);
+                    return Err(tide::Error::from_str(
+                    StatusCode::InternalServerError,
+                    err.to_string(),
+                    ));
+                }
+            }
         }
         Err(err) => {
-            tide::log::error!("Error getting connection: {:?}", err);
+            tide::log::error!("Error getting MSSQL connection: {:?}", err);
+            return Err(tide::Error::from_str(
+                StatusCode::InternalServerError,
+                err.to_string(),
+            ));
         }
     }
 

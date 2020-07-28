@@ -16,27 +16,26 @@ impl MSSQL {
         let mssql_password =
             std::env::var("MSSQL_PASSWORD").context("Failed to configure MSSQL_PASSWORD")?;
 
-        log::info!(
-            "Connecting to an MSSQL Server: {}:{}.",
-            mssql_host,
-            mssql_port
-        );
+        log::info!("Connecting to MSSQL Server: {}:{}.", mssql_host, mssql_port);
 
         let mut config = Config::new();
-        config.host(mssql_host);
+        config.host(mssql_host.clone());
         config.port(
             mssql_port
                 .parse::<u16>()
                 .context("Failed to configure MSSQL_PORT")?,
         );
         config.authentication(AuthMethod::sql_server(mssql_user, mssql_password));
-
         let tcp_stream = TcpStream::connect(config.get_addr()).await?;
         // We'll disable the Nagle algorithm. Buffering is handled internally with a `Sink`.
         tcp_stream.set_nodelay(true)?;
-
         let client = Client::connect(config, tcp_stream).await?;
-        log::info!("Successfully connected to MSSQL Server.");
+
+        log::info!(
+            "Successfully connected to MSSQL Server: {}:{}",
+            mssql_host,
+            mssql_port
+        );
 
         Ok(client)
     }
