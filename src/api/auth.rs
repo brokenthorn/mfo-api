@@ -1,3 +1,5 @@
+//! API Authentication and Authorization.
+
 use http::HeaderMap;
 use jsonwebtoken::{decode, encode, Header, Validation};
 use jsonwebtoken::{DecodingKey, EncodingKey};
@@ -7,21 +9,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 fn get_encoding_key() -> EncodingKey {
-    // TODO: get the secret from config
-    EncodingKey::from_secret(
-        std::env::var("ENCODING_KEY")
-            .unwrap_or("WqgNQf97UCsreCNwenCUrRmW".to_string())
-            .as_bytes(),
-    )
+    EncodingKey::from_secret(std::env::var("JWT_ENCODING_KEY").unwrap().as_bytes())
 }
 
 fn get_decoding_key() -> DecodingKey<'static> {
-    DecodingKey::from_secret(
-        std::env::var("DECODING_KEY")
-            .unwrap_or("jhCvqT4tpgZrbsRZfGsLYE8D".to_string())
-            .as_bytes(),
-    )
-    .into_static()
+    DecodingKey::from_secret(std::env::var("JWT_DECODING_KEY").unwrap().as_bytes()).into_static()
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -57,9 +49,9 @@ pub fn claims_for(user_id: Uuid, expire_in: u64) -> Claims {
 }
 
 fn seconds_from_now(secs: u64) -> u64 {
-    let expiry_time =
-        SystemTime::now().duration_since(UNIX_EPOCH).unwrap() + Duration::from_secs(secs);
-    expiry_time.as_secs()
+    let duration = Duration::from_secs(secs);
+    let duration_since_epoch = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    (duration_since_epoch + duration).as_secs()
 }
 
 pub fn extract_token(headers: &HeaderMap) -> Option<&str> {
@@ -89,11 +81,13 @@ mod tests {
 
     #[test]
     fn encode_decode_token() {
+        std::env::set_var("JWT_ENCODING_KEY", "1234567890");
+        std::env::set_var("JWT_DECODING_KEY", "1234567890");
         let sub = Uuid::new_v4();
         let token = encode_token(sub);
         let decoded = decode::<Claims>(&token, &get_decoding_key(), &Validation::default());
         if let Err(e) = &decoded {
-            println!("decode err: {}", e);
+            println!("Failed to decode Claims: {}", e);
         }
 
         assert!(decoded.is_ok());

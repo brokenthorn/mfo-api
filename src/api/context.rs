@@ -1,3 +1,5 @@
+//! Provides API context objects.
+
 use crate::db::mssql::MSSQL;
 
 /// Shared state for all HTTP requests.
