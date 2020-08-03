@@ -4,16 +4,17 @@ pub mod auth;
 pub mod context;
 pub mod stock;
 
-use crate::api::context::Context;
 use serde::Serialize;
 use tide::Server;
+
+use crate::api::context::Context;
 
 /// Generic serializable API response type with two optional fields: `data` and `error`.
 #[derive(Serialize)]
 pub struct ApiResponse<D, E>
 where
-    D: Serialize,
-    E: Serialize,
+    D: Serialize + Sync + Send,
+    E: Serialize + Sync + Send,
 {
     /// Requested data.
     pub data: Option<D>,
