@@ -33,8 +33,8 @@ pub mod util;
 /// Application entry point.
 #[async_std::main]
 async fn main() -> Result<(), std::io::Error> {
-    tide::log::start();
     util::fix_rust_log_if_not_set();
+    tide::log::with_level(tide::log::LevelFilter::Info);
 
     tide::log::info!("Application starting up.");
     let address = format!(
