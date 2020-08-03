@@ -17,10 +17,9 @@ pub async fn get_stock(req: Request<crate::api::context::Context>) -> Result<Res
     match conn_result {
         Ok(mut conn) => {
             let current_date = chrono::Local::now().format("%Y%m%d %H:%M:%S").to_string();
-
-            // REF: Due to a known bug, SET NOCOUNT ON needs to be used when expecting results back from executing stored procedure, otherwise the driver gets back an `affected rows` value after which it stops processing the stream and does not get further result sets.
+            
             match conn.query(
-                "SET NOCOUNT ON; DECLARE @mesaj_eroare VARCHAR(255); EXEC [BizPharmaHO].[dbo].[spBPWSWebGetStoc] @DataUltimaActualizare = '19000101', @DataCurenta = @P1, @MesajEroare = @mesaj_eroare OUTPUT; SELECT @mesaj_eroare AS [mesaj_eroare];",
+                "DECLARE @mesaj_eroare VARCHAR(255); EXEC [BizPharmaHO].[dbo].[spBPWSWebGetStoc] @DataUltimaActualizare = '19000101', @DataCurenta = @P1, @MesajEroare = @mesaj_eroare OUTPUT; SELECT @mesaj_eroare AS [mesaj_eroare];",
                 &[&current_date],
             ).await {
                 Ok(qr) => {
