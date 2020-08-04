@@ -2,7 +2,7 @@
 
 ![Tests](https://github.com/brokenthorn/mfo-api/workflows/Main/badge.svg)
 
-`mfo-api` is a small and fast [Web API](https://en.wikipedia.org/wiki/Web_API) server written in Rust and used by the [minifarmonline.ro](https://minifarmonline.ro) store to get information (eg. products, prices, stock) to and from the point of sale applications used in the physical locations where purchase orders are processed and from where products are shipped to customers.
+`mfo-api` is a small and fast backend [Web API](https://en.wikipedia.org/wiki/Web_API) server written in Rust and used by the [minifarmonline.ro](https://minifarmonline.ro) store to get information (eg. products, prices, stock) to and from the point of sale applications used in the physical locations where purchase orders are processed and from where products are shipped to customers.
 
 A Dockerfile exists so it can easily be deployed to Docker or public clouds like AWS or Azure.
 
@@ -11,7 +11,7 @@ A Dockerfile exists so it can easily be deployed to Docker or public clouds like
 Install [Rust](https://www.rust-lang.org/tools/install) and run `cargo build --release` inside the project folder:
 
 ```bash
-$ cargo build
+$ cargo build --release
     Compiling mfo-api v0.1.0 (/.../mfo-api)
     # output omitted
     Finished release [optimized] target(s) in 19.72s
@@ -19,7 +19,7 @@ $ cargo build
 
 ## Run
 
-You can run the server for testing by just running:
+You can run the server for manual testing by just running:
 
 ```bash
 $ HOST=0.0.0.0 PORT=8080 MSSQL_HOST=10.0.0.1 MSSQL_PORT=1433 MSSQL_USER=sql_user MSSQL_PASSWORD=sql_password cargo run
@@ -28,7 +28,7 @@ $ HOST=0.0.0.0 PORT=8080 MSSQL_HOST=10.0.0.1 MSSQL_PORT=1433 MSSQL_USER=sql_user
 # output omitted
 ```
 
-Don't forget to set `MSSQL_*` environment variables before startig the server, otherwise the server will shutdown the first time it tries to connect to the MSSQL server and fails to read these variables.
+Don't forget to set `MSSQL_*` environment variables before starting the server, otherwise the server will shutdown the first time it tries to connect to the MSSQL server and fails to read these variables.
 
 `HOST` and `PORT` specify the host and port number that the web server will listen on, and are optional. Their defaults are the same as above.
 
