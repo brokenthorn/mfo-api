@@ -57,7 +57,7 @@ impl MSSQL {
         data_ultima_actualizare: &str,
         data_curenta: &str,
     ) -> Result<ApiResponse<Stock, String>> {
-        // REF: Consider using futures combinators and rewerite without variable declarations.
+        // REF: Consider using futures combinators and rewrite without variable declarations.
         let mut client = self.connect().await?;
         let query_result = client.query(
             "DECLARE @mesaj_eroare VARCHAR(255); EXEC [BizPharmaHO].[dbo].[spBPWSWebGetStoc] @DataUltimaActualizare = @P1, @DataCurenta = @P2, @MesajEroare = @mesaj_eroare OUTPUT; SELECT @mesaj_eroare AS [mesaj_eroare];",
