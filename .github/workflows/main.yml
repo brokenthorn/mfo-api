@@ -2,19 +2,22 @@ name: Main
 
 on:
   push:
-    branches: [ master, dev ]
+    branches: [master, dev]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  run-tests:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: "Check for errors"
-      run: cargo check --release --package mfo-api
-    - name: "Run unit and integration tests"
-      run: cargo test --release --package mfo-api
+      - name: "Checkout"
+        uses: actions/checkout@v2
+
+      - name: "Check code for errors"
+        run: cargo check --release --package mfo-api
+
+      - name: "Run unit and integration tests"
+        run: cargo test --release --package mfo-api
