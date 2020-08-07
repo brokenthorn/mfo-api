@@ -1,12 +1,13 @@
+name: Publish Docker image on version tag
+
 on:
   push:
     tags:
       - "v*"
-name: Build and push Docker image from v* git tags
 
 jobs:
-  push-docker-images:
-    name: Build and push Docker image
+  build-and-push-image:
+    name: Build and push image
     runs-on: ubuntu-latest
 
     steps:
